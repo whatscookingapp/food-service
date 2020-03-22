@@ -20,6 +20,15 @@
         }
       },
       {
+        "package": "Bridges",
+        "repositoryURL": "https://github.com/SwifQL/Bridges.git",
+        "state": {
+          "branch": null,
+          "revision": "be334135aede33ac5350fdb097ab21e2b1894ec4",
+          "version": "1.0.0-rc.1.0.0"
+        }
+      },
+      {
         "package": "console-kit",
         "repositoryURL": "https://github.com/vapor/console-kit.git",
         "state": {
@@ -42,17 +51,44 @@
         "repositoryURL": "https://github.com/vapor/fluent-kit.git",
         "state": {
           "branch": null,
-          "revision": "26d07ea9145365309770d9c4f3fec053350d2145",
-          "version": "1.0.0-rc.1.5"
+          "revision": "a15e8c5e288279221739d38a72cc7cbfce2efc75",
+          "version": "1.0.0-rc.1.10"
         }
       },
       {
-        "package": "fluent-sqlite-driver",
-        "repositoryURL": "https://github.com/vapor/fluent-sqlite-driver.git",
+        "package": "fluent-postgres-driver",
+        "repositoryURL": "https://github.com/vapor/fluent-postgres-driver.git",
         "state": {
           "branch": null,
-          "revision": "df46fa5cb2d3e42cd02f55fe8136b4c3269ad6d1",
-          "version": "4.0.0-rc.1.1"
+          "revision": "36ab616bf73dceed67dd97d5fa5ac8b4b55dd62c",
+          "version": "2.0.0-rc.1"
+        }
+      },
+      {
+        "package": "postgres-kit",
+        "repositoryURL": "https://github.com/vapor/postgres-kit.git",
+        "state": {
+          "branch": null,
+          "revision": "8f6d4fa648c5aa1d6ecdefea4d7fe25f97e599d0",
+          "version": "2.0.0-rc.1.1"
+        }
+      },
+      {
+        "package": "postgres-nio",
+        "repositoryURL": "https://github.com/vapor/postgres-nio.git",
+        "state": {
+          "branch": null,
+          "revision": "4871046bec40a5dbbc6aca572f655a765faba04f",
+          "version": "1.0.0-rc.1.2"
+        }
+      },
+      {
+        "package": "PostgresBridge",
+        "repositoryURL": "https://github.com/SwifQL/PostgresBridge.git",
+        "state": {
+          "branch": null,
+          "revision": "e53347510a83b8e0aed2af87a7d97d05597d16d2",
+          "version": "1.0.0-rc.1.0.1"
         }
       },
       {
@@ -74,21 +110,12 @@
         }
       },
       {
-        "package": "sqlite-kit",
-        "repositoryURL": "https://github.com/vapor/sqlite-kit.git",
+        "package": "SwifQL",
+        "repositoryURL": "https://github.com/SwifQL/SwifQL.git",
         "state": {
           "branch": null,
-          "revision": "7251abf07442da3e5dc6e13e1564670bf82e10d3",
-          "version": "4.0.0-rc.1"
-        }
-      },
-      {
-        "package": "sqlite-nio",
-        "repositoryURL": "https://github.com/vapor/sqlite-nio.git",
-        "state": {
-          "branch": null,
-          "revision": "96f69e53f503830e55280c5c4fbaffc0b50eadd5",
-          "version": "1.0.0-rc.1"
+          "revision": "1124439c2bc0ee1126b2eea4e23327091f313fbb",
+          "version": "2.0.0-beta.1.5.3"
         }
       },
       {
@@ -168,8 +195,17 @@
         "repositoryURL": "https://github.com/vapor/vapor.git",
         "state": {
           "branch": null,
-          "revision": "66c0181600be7b09b5e61744a68f1a417b3f51a5",
-          "version": "4.0.0-rc.3"
+          "revision": "6954c471dc6b405dcafde2fa026b37ff5b07b08f",
+          "version": "4.0.0-rc.3.4"
+        }
+      },
+      {
+        "package": "VaporBridges",
+        "repositoryURL": "https://github.com/SwifQL/VaporBridges.git",
+        "state": {
+          "branch": null,
+          "revision": "cc9ffba416b1a2227085cc6ae8671230634af824",
+          "version": "1.0.0-rc.1.2.0"
         }
       },
       {
