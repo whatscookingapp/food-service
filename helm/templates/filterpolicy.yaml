@@ -1,0 +1,11 @@
+apiVersion: getambassador.io/v2
+kind: FilterPolicy
+metadata:
+  name: food-service-policy
+  namespace: default
+spec:
+  rules:
+    - host: "*"
+      path: /food/
+      filters:
+        - name: authentication

@@ -34,9 +34,6 @@ final class Food: Model, Content {
     @Field(key: "expires")
     var expires: Date?
     
-    @Field(key: "distance")
-    var distance: Double?
-    
     @Timestamp(key: "created_at", on: .create)
     var createdAt: Date?
     
