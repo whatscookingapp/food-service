@@ -1,0 +1,87 @@
+stages:
+  # - test
+  - tag
+  - deploy
+
+cache:
+  key: "$CI_BUILD_REF_NAME-$CI_COMMIT_REF_NAME"
+  paths:
+    - .build
+
+variables:
+  POSTGRES_DB: microservice
+  POSTGRES_USER: jimmy
+  POSTGRES_PASSWORD: password
+
+# test:
+#   stage: test
+#   image: swift:5.1
+#   variables:
+#     DATABASE_URL: postgresql://jimmy:password@postgres:5432/microservice 
+#     MAIL_HOST: http://localhost:8084
+#     BASE_URL: http://localhost:8082
+#   services:
+#     - postgres
+#   before_script:
+#     - git config --global url."https://gitlab-ci-token:${CI_JOB_TOKEN}@gitlab.com/food-sharing/scopes.git".insteadOf https://gitlab.com/food-sharing/scopes.git
+#   script:
+#     - apt-get -qq update && apt-get install -y libssl-dev libicu-dev zlib1g-dev
+#     - swift package resolve
+#     - swift package clean
+#     - swift test
+#   tags:
+#     - docker
+
+docker:image:
+  stage: tag
+  image: docker:1.11
+  only:
+    - master
+  services:
+    - docker:dind
+  script:
+    - docker version
+    - docker login -u gitlab-ci-token -p $CI_BUILD_TOKEN $CI_REGISTRY
+    - docker build -t $CI_REGISTRY_IMAGE:latest .
+    - docker tag $CI_REGISTRY_IMAGE:latest $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+    - docker push $CI_REGISTRY_IMAGE:latest
+    - docker push $CI_REGISTRY_IMAGE:$CI_COMMIT_SHORT_SHA
+
+deploy-test:
+  stage: deploy
+  when: manual
+  image: movievalley/k8s-helm-doctl:0.0.2
+  environment:
+    name: test
+    url: https://api.test.whatscooking.app
+    on_stop: stop-test
+  before_script:
+    - doctl auth init -t $DO_TOKEN
+    - doctl kubernetes cluster kubeconfig save $CLUSTER_NAME
+    - helm init --client-only
+    - helm repo add stable https://kubernetes-charts.storage.googleapis.com/
+    - helm repo add incubator https://kubernetes-charts-incubator.storage.googleapis.com/
+    - helm repo update
+  script:
+    - cd helm
+    - export DEPLOYS=$(helm ls | grep $CI_PROJECT_NAME | wc -l)
+    - if [ ${DEPLOYS}  -eq 0 ]; then helm install --name=$CI_PROJECT_NAME . --namespace=$TEST_NAMESPACE --set=image.tag=$CI_COMMIT_SHORT_SHA; else helm upgrade $CI_PROJECT_NAME . --namespace=$TEST_NAMESPACE --set=image.tag=$CI_COMMIT_SHORT_SHA; fi
+  only:
+    - master
+
+stop-test:
+  stage: deploy
+  image: movievalley/k8s-helm-doctl:0.0.2
+  before_script:
+    - doctl auth init -t $DO_TOKEN
+    - doctl kubernetes cluster kubeconfig save $CLUSTER_NAME
+    - helm init --client-only
+    - helm repo add stable https://kubernetes-charts.storage.googleapis.com/
+    - helm repo add incubator https://kubernetes-charts-incubator.storage.googleapis.com/
+    - helm repo update
+  script:
+    - helm del --purge $CI_PROJECT_NAME
+  when: manual
+  environment:
+    name: test
+    action: stop
