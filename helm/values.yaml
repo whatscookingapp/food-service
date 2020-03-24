@@ -20,15 +20,14 @@ service:
         ---
         apiVersion: ambassador/v2
         kind:  Mapping
-        name:  food-service-food-mapping
+        name:  food-service-food
         prefix: /food/
         service: food-service:8080
         rewrite: /food/
-    getambassador.io/config: |
         ---
         apiVersion: ambassador/v2
         kind:  Mapping
-        name:  food-service-discover-mapping
+        name:  food-service-discover
         prefix: /discover/
         service: food-service:8080
         rewrite: /discover/

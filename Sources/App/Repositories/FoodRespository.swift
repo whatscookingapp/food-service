@@ -33,8 +33,11 @@ struct FoodRepositoryImpl: FoodRepository {
             case .slots:
                 query = query.sort(\.$slots, .descending).sort(\.$createdAt, .descending)
             case .location:
-//                query = query.sor
-                fatalError()
+                guard let lat = lat, let lon = lon else {
+                    return req.eventLoop.makeFailedFuture(Abort(.badRequest))
+                }
+                query = query.sort(.custom("ABS(lat - \(lat))"))
+                query = query.sort(.custom("ABS(lon - \(lon))"))
         }
             
         return query.paginate(for: req)
