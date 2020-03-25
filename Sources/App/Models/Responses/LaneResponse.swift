@@ -3,5 +3,5 @@ import Vapor
 struct LaneResponse: Content {
     
     let type: FoodType
-    let items: [FoodResponse]
+    let items: [FoodOverviewResponse]
 }

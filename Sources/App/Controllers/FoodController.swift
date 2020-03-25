@@ -19,13 +19,13 @@ struct FoodController: RouteCollection {
 
 private extension FoodController {
     
-    func fetch(_ req: Request) throws -> EventLoopFuture<Page<FoodResponse>> {
+    func fetch(_ req: Request) throws -> EventLoopFuture<Page<FoodOverviewResponse>> {
         let filters = try req.query.decode(FilterRequest.self)
         let sorting = try req.query.decode(SortRequest.self)
         let sortingType = sorting.sorting ?? .dateDesc
         return foodRepository.queryPaginated(type: filters.type, sorting: sortingType, lat: sorting.lat, lon: sorting.lon, on: req).flatMapThrowing { page in
             do {
-                let food = try page.items.map { try FoodResponse(food: $0, lat: sorting.lat, lon: sorting.lon) }
+                let food = try page.items.map { try FoodOverviewResponse(food: $0, lat: sorting.lat, lon: sorting.lon) }
                 return Page(items: food, metadata: page.metadata)
             } catch {
                 throw Abort(.internalServerError)

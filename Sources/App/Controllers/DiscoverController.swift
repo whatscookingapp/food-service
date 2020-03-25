@@ -21,7 +21,7 @@ private extension DiscoverController {
         let userID = try req.userID
         let laneQueries: [EventLoopFuture<LaneResponse>] = FoodType.allCases.map { type in
             return foodRepository.query(type: type, limit: 10, on: req).flatMapThrowing { items in
-                let laneItems = try items.map { try FoodResponse(food: $0, lat: nil, lon: nil) }
+                let laneItems = try items.map { try FoodOverviewResponse(food: $0, lat: nil, lon: nil) }
                 return LaneResponse(type: type, items: laneItems)
             }
         }

@@ -1,6 +1,6 @@
 import Vapor
 
-struct FoodResponse: Content {
+struct FoodOverviewResponse: Content {
     
     let id: UUID
     let title: String

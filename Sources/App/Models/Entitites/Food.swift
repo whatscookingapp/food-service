@@ -10,6 +10,9 @@ final class Food: Model, Content {
     @Field(key: "title")
     var title: String
     
+    @Field(key: "description")
+    var description: String?
+    
     @Parent(key: "creator_id")
     var creator: User
     
@@ -42,21 +45,9 @@ final class Food: Model, Content {
 
     init() { }
 
-    init(id: UUID? = nil, title: String, creatorID: UUID, type: FoodType, slots: Int, bringContainer: Bool, lat: Double?, lon: Double?, expires: Date?) {
-        self.id = id
-        self.title = title
-        self.$creator.id = creatorID
-        self.type = type
-        self.image = nil
-        self.slots = slots
-        self.bringContainer = bringContainer
-        self.lat = lat
-        self.lon = lon
-        self.expires = expires
-    }
-    
     init(createRequest: CreateFoodRequest, creatorID: UUID) {
         self.title = createRequest.title
+        self.description = createRequest.description
         self.$creator.id = creatorID
         self.type = createRequest.type
         self.image = nil
