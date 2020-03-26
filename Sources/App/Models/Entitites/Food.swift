@@ -37,6 +37,9 @@ final class Food: Model, Content {
     @Field(key: "expires")
     var expires: Date?
     
+    @Field(key: "show_distance")
+    var showDistance: Bool
+    
     @Timestamp(key: "created_at", on: .create)
     var createdAt: Date?
     
@@ -56,5 +59,6 @@ final class Food: Model, Content {
         self.lat = createRequest.lat
         self.lon = createRequest.lon
         self.expires = createRequest.expires
+        self.showDistance = createRequest.showDistance
     }
 }

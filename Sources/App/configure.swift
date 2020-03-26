@@ -27,6 +27,7 @@ public func configure(_ app: Application) throws {
     // Configure migrations
     app.migrations.add(CreateFood())
     app.migrations.add(FoodAddDescription())
+    app.migrations.add(FoodAddShowDistance())
     
     try app.autoMigrate().wait()
     

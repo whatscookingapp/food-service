@@ -10,4 +10,5 @@ struct CreateFoodRequest: Content {
     let lat: Double?
     let lon: Double?
     let expires: Date?
+    let showDistance: Bool
 }
