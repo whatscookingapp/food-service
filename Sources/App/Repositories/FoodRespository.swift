@@ -49,6 +49,7 @@ struct FoodRepositoryImpl: FoodRepository {
                 filter.filter(\.$type == .enumCase(type.rawValue))
             }
         }
+        .join(Image.self, on: \Food.$imageID == \Image.$id, method: .left)
         .group(.or) { dateFilters in
             dateFilters.filter(\.$expires == nil)
             dateFilters.filter(\.$expires > Date())
