@@ -35,11 +35,13 @@ private extension FoodController {
         }
     }
     
-    func create(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
+    func create(_ req: Request) throws -> EventLoopFuture<CreateFoodResponse> {
         let userID = try req.requireUserID()
         let createRequest = try req.content.decode(CreateFoodRequest.self)
         let food = Food(createRequest: createRequest, creatorID: userID)
-        return foodRepository.save(food: food, on: req).transform(to: .ok)
+        return foodRepository.save(food: food, on: req).flatMapThrowing {
+            try CreateFoodResponse(id: $0.requireID())
+        }
     }
     
     func update(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
