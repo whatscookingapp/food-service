@@ -13,7 +13,8 @@ struct FoodController: RouteCollection {
         let foodRoute = routes.grouped("food")
         foodRoute.get("", use: fetch)
         foodRoute.post("", use: create)
-        foodRoute.put(":id", use: update)
+        foodRoute.patch(":id", use: update)
+        foodRoute.delete(":id", use: delete)
     }
 }
 
@@ -23,9 +24,10 @@ private extension FoodController {
         let filters = try req.query.decode(FilterRequest.self)
         let sorting = try req.query.decode(SortRequest.self)
         let sortingType = sorting.sorting ?? .dateDesc
+        let imageTransformer = try req.application.makeImageTransformer()
         return foodRepository.queryPaginated(type: filters.type, sorting: sortingType, lat: sorting.lat, lon: sorting.lon, on: req).flatMapThrowing { page in
             do {
-                let food = try page.items.map { try FoodOverviewResponse(food: $0, lat: sorting.lat, lon: sorting.lon) }
+                let food = try page.items.map { try FoodOverviewResponse(food: $0, lat: sorting.lat, lon: sorting.lon, imageTransformer: imageTransformer) }
                 return Page(items: food, metadata: page.metadata)
             } catch {
                 throw Abort(.internalServerError)
@@ -56,7 +58,21 @@ private extension FoodController {
             food.lat = updateRequest.lat ?? food.lat
             food.lon = updateRequest.lon ?? food.lon
             food.expires = updateRequest.expires ?? food.expires
+            food.imageID = updateRequest.imageID ?? food.imageID
             return self.foodRepository.save(food: food, on: req).transform(to: .ok)
+        }
+    }
+    
+    func delete(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
+        guard let id: UUID = req.parameters.get("id") else {
+            throw Abort(.badRequest)
+        }
+        let userID = try req.requireUserID()
+        return foodRepository.find(id: id, on: req).unwrap(or: Abort(.notFound)).flatMap { food in
+            guard food.$creator.id == userID else {
+                return req.eventLoop.makeFailedFuture(Abort(.unauthorized))
+            }
+            return self.foodRepository.delete(food: food, on: req).transform(to: .ok)
         }
     }
 }

@@ -9,7 +9,7 @@ struct FoodOverviewResponse: Content {
     let image: ImageResponse?
     let createdAt: Date?
     
-    init(food: Food, lat: Double?, lon: Double?) throws {
+    init(food: Food, lat: Double?, lon: Double?, imageTransformer: ImageTransformer) throws {
         self.id = try food.requireID()
         self.title = food.title
         self.creator = try UserResponse(user: food.creator)
@@ -18,7 +18,12 @@ struct FoodOverviewResponse: Content {
         } else {
             self.distance = nil
         }
-        self.image = nil
+        let image = try food.joined(Image.self)
+        if let bucket = image.bucket, let key = image.key {
+            self.image = try imageTransformer.transform(bucket: bucket, key: key)
+        } else {
+            self.image = nil
+        }
         self.createdAt = food.createdAt
     }
 }

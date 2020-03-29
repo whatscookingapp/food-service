@@ -9,4 +9,5 @@ struct UpdateFoodRequest: Content {
     let lat: Double?
     let lon: Double?
     let expires: Date?
+    let imageID: UUID?
 }

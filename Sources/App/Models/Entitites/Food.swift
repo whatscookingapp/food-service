@@ -19,8 +19,8 @@ final class Food: Model, Content {
     @Enum(key: "type")
     var type: FoodType
     
-    @Field(key: "image")
-    var image: String?
+    @Field(key: "image_id")
+    var imageID: UUID?
     
     @Field(key: "slots")
     var slots: Int?
@@ -53,7 +53,6 @@ final class Food: Model, Content {
         self.description = createRequest.description
         self.$creator.id = creatorID
         self.type = createRequest.type
-        self.image = nil
         self.slots = createRequest.slots
         self.bringContainer = createRequest.bringContainer
         self.lat = createRequest.lat

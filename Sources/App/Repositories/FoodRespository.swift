@@ -1,7 +1,5 @@
 import Vapor
 import FluentPostgresDriver
-import SwifQL
-import PostgresBridge
 
 protocol FoodRepository {
     
@@ -9,6 +7,7 @@ protocol FoodRepository {
     func query(type: FoodType?, limit: Int, on req: Request) -> EventLoopFuture<[Food]>
     func find(id: UUID, on req: Request) -> EventLoopFuture<Food?>
     func save(food: Food, on req: Request) -> EventLoopFuture<Food>
+    func delete(food: Food, on req: Request) -> EventLoopFuture<Void>
 }
 
 struct FoodRepositoryImpl: FoodRepository {
@@ -19,6 +18,7 @@ struct FoodRepositoryImpl: FoodRepository {
                 filter.filter(\.$type == .enumCase(type.rawValue))
             }
         }
+        .join(Image.self, on: \Food.$imageID == \Image.$id, method: .left)
         .group(.or) { dateFilters in
             dateFilters.filter(\.$expires == nil)
             dateFilters.filter(\.$expires > Date())
@@ -64,5 +64,9 @@ struct FoodRepositoryImpl: FoodRepository {
     
     func save(food: Food, on req: Request) -> EventLoopFuture<Food> {
         return food.save(on: req.db).map { food }
+    }
+    
+    func delete(food: Food, on req: Request) -> EventLoopFuture<Void> {
+        return food.delete(on: req.db)
     }
 }

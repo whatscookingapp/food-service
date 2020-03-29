@@ -33,3 +33,13 @@ public func configure(_ app: Application) throws {
     
     try routes(app)
 }
+
+extension Application {
+    
+    func makeImageTransformer() throws -> ImageTransformer {
+        guard let imageHost = Environment.get("IMAGE_HOST") else {
+            throw Abort(.internalServerError, reason: "IMAGE_HOST not configured")
+        }
+        return ImageTransformer(imageHost: imageHost)
+    }
+}

@@ -9,3 +9,4 @@ data:
   DATABASE_PORT: "25060"
   DATABASE: "defaultdb"
   DATABASE_USER: "doadmin"
+  IMAGE_HOST: "https://dru0ukfzkhf67.cloudfront.net"

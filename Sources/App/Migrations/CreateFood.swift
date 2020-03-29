@@ -11,11 +11,11 @@ struct CreateFood: Migration {
             .flatMap
             { type in
                 database.schema(Food.schema)
-                    .field("id", .uuid, .required)
+                    .id()
                     .field("title", .string, .required)
                     .field("creator_id", .uuid, .references(User.schema, "id"))
                     .field("type", type, .required)
-                    .field("image", .string)
+                    .field("image_id", .uuid, .references(Image.schema, "id"))
                     .field("slots", .int)
                     .field("bring_container", .bool)
                     .field("lat", .double)
@@ -28,8 +28,8 @@ struct CreateFood: Migration {
     }
     
     func revert(on database: Database) -> EventLoopFuture<Void> {
-        database.schema("food-type").delete().flatMap {
-            database.enum(Food.schema).delete()
+        database.enum("food-type").delete().flatMap {
+            database.schema(Food.schema).delete()
         }
     }
 }
