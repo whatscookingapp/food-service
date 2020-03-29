@@ -26,12 +26,7 @@ private extension FoodController {
         let sortingType = sorting.sorting ?? .dateDesc
         let imageTransformer = try req.application.makeImageTransformer()
         return foodRepository.queryPaginated(type: filters.type, sorting: sortingType, lat: sorting.lat, lon: sorting.lon, on: req).flatMapThrowing { page in
-            do {
-                let food = try page.items.map { try FoodOverviewResponse(food: $0, lat: sorting.lat, lon: sorting.lon, imageTransformer: imageTransformer) }
-                return Page(items: food, metadata: page.metadata)
-            } catch {
-                throw Abort(.internalServerError)
-            }
+            return try page.map { try FoodOverviewResponse(food: $0, lat: sorting.lat, lon: sorting.lon, imageTransformer: imageTransformer) }
         }
     }
     
