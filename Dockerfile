@@ -1,5 +1,5 @@
 # Build image
-FROM swiftlang/swift:nightly-5.2-xenial as builder
+FROM swift:5.2 as builder
 RUN apt-get -qq update && apt-get install -y \
   libssl-dev libicu-dev zlib1g-dev libgd-dev
 WORKDIR /App
