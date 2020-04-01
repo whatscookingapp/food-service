@@ -25,7 +25,7 @@ private extension FoodController {
         let sorting = try req.query.decode(SortRequest.self)
         let sortingType = sorting.sorting ?? .dateDesc
         let imageTransformer = try req.application.makeImageTransformer()
-        return foodRepository.queryPaginated(type: filters.type, sorting: sortingType, lat: sorting.lat, lon: sorting.lon, on: req).flatMapThrowing { page in
+        return foodRepository.queryPaginated(filters: filters, sorting: sortingType, lat: sorting.lat, lon: sorting.lon, on: req).flatMapThrowing { page in
             return try page.map { try FoodOverviewResponse(food: $0, lat: sorting.lat, lon: sorting.lon, imageTransformer: imageTransformer) }
         }
     }

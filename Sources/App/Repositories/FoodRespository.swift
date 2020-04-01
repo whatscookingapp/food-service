@@ -3,7 +3,7 @@ import FluentPostgresDriver
 
 protocol FoodRepository {
     
-    func queryPaginated(type: FoodType?, sorting: Sorting, lat: Double?, lon: Double?, on req: Request) -> EventLoopFuture<Page<Food>>
+    func queryPaginated(filters: FilterRequest, sorting: Sorting, lat: Double?, lon: Double?, on req: Request) -> EventLoopFuture<Page<Food>>
     func query(type: FoodType?, limit: Int, on req: Request) -> EventLoopFuture<[Food]>
     func find(id: UUID, on req: Request) -> EventLoopFuture<Food?>
     func save(food: Food, on req: Request) -> EventLoopFuture<Food>
@@ -12,17 +12,28 @@ protocol FoodRepository {
 
 struct FoodRepositoryImpl: FoodRepository {
     
-    func queryPaginated(type: FoodType?, sorting: Sorting, lat: Double?, lon: Double?, on req: Request) -> EventLoopFuture<Page<Food>> {
-        var query = Food.query(on: req.db).group(.and) { filter in
-            if let type = type {
-                filter.filter(\.$type == .enumCase(type.rawValue))
+    func queryPaginated(filters: FilterRequest, sorting: Sorting, lat: Double?, lon: Double?, on req: Request) -> EventLoopFuture<Page<Food>> {
+        var query = Food.query(on: req.db).group(.or) { filter in
+            filters.types.forEach {
+                filter.filter(\.$type == .enumCase($0.rawValue))
             }
         }
-        .join(Image.self, on: \Food.$imageID == \Image.$id, method: .left)
+        .group(.and) { filter in
+            if let slots = filters.slots {
+                filter.filter(\.$slots >= slots)
+            }
+            if let minimumDate = filters.minimumDate {
+                filter.filter(\.$expires >= minimumDate)
+            }
+            if let maximumDate = filters.maximumDate {
+                filter.filter(\.$expires < maximumDate)
+            }
+        }
         .group(.or) { dateFilters in
             dateFilters.filter(\.$expires == nil)
             dateFilters.filter(\.$expires > Date())
         }
+        .join(Image.self, on: \Food.$imageID == \Image.$id, method: .left)
         .with(\.$creator)
             
         switch sorting {

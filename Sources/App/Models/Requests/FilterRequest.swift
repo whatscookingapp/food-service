@@ -2,5 +2,8 @@ import Vapor
 
 struct FilterRequest: Content {
     
-    let type: FoodType?
+    let types: [FoodType]
+    let slots: Int?
+    let minimumDate: Date?
+    let maximumDate: Date?
 }
