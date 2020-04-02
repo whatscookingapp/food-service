@@ -7,4 +7,5 @@ struct FilterRequest: Content {
     let minimumDate: Date?
     let maximumDate: Date?
     let query: String?
+    let distance: Double?
 }

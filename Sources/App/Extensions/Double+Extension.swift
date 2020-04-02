@@ -1,6 +1,8 @@
 import Foundation
 
-extension FloatingPoint {
+extension Double {
+    
+    static let earthRadius: Double = 6371
     
     var degreesToRadians: Self { self * .pi / 180 }
     var radiansToDegrees: Self { self * 180 / .pi }
@@ -14,5 +16,13 @@ extension FloatingPoint {
         dist = dist * 1.609344
         
         return dist
+    }
+    
+    static func boundingBox(lat: Double, lon: Double, radius: Double) -> ((Double, Double), (Double, Double)) {
+        let minLat: Double = lat - (radius/earthRadius).radiansToDegrees
+        let minLon: Double = lon - (radius/earthRadius/cos(lat.degreesToRadians)).radiansToDegrees
+        let maxLat: Double = lat + (radius/earthRadius).radiansToDegrees
+        let maxLon: Double = lon + (radius/earthRadius/cos(lat.degreesToRadians)).radiansToDegrees
+        return ((minLat, minLon), (maxLat, maxLon))
     }
 }

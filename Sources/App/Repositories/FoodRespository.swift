@@ -13,6 +13,11 @@ protocol FoodRepository {
 struct FoodRepositoryImpl: FoodRepository {
     
     func queryPaginated(filters: FilterRequest, sorting: Sorting, lat: Double?, lon: Double?, language: String, on req: Request) -> EventLoopFuture<Page<Food>> {
+        if filters.distance != nil {
+            guard lat != nil, lon != nil else {
+                return req.eventLoop.makeFailedFuture(Abort(.badRequest))
+            }
+        }
         var query = Food.query(on: req.db).group(.or) { filter in
             filters.types.forEach {
                 filter.filter(\.$type == .enumCase($0.rawValue))
@@ -30,6 +35,13 @@ struct FoodRepositoryImpl: FoodRepository {
             }
             if let query = filters.query?.toSearchableQuery() {
                 filter.filter(\.$document, .custom("@@"), .custom("to_tsquery('\(language)', '\(query)')"))
+            }
+            if let distance = filters.distance, let lat = lat, let lon = lon {
+                let ((minLat, minLon), (maxLat, maxLon)) = Double.boundingBox(lat: lat, lon: lon, radius: distance)
+                filter.filter(\.$lat > minLat)
+                filter.filter(\.$lon > minLon)
+                filter.filter(\.$lat < maxLat)
+                filter.filter(\.$lon < maxLon)
             }
         }
         .group(.or) { dateFilters in
