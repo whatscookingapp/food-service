@@ -6,4 +6,5 @@ struct FilterRequest: Content {
     let slots: Int?
     let minimumDate: Date?
     let maximumDate: Date?
+    let query: String?
 }

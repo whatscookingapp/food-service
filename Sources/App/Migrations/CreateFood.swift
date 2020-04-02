@@ -23,6 +23,8 @@ struct CreateFood: Migration {
                     .field("expires", .datetime)
                     .field("created_at", .datetime)
                     .field("updated_at", .datetime)
+                    .field("document", .custom("tsvector"))
+                    .field("language", .string, .required)
                     .create()
         }
     }

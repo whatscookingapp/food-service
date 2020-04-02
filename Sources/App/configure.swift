@@ -28,6 +28,8 @@ public func configure(_ app: Application) throws {
     app.migrations.add(CreateFood())
     app.migrations.add(FoodAddDescription())
     app.migrations.add(FoodAddShowDistance())
+    app.migrations.add(FoodAddDocumentTrigger())
+    app.migrations.add(FoodAddDocumentIndex())
     
     try app.autoMigrate().wait()
     

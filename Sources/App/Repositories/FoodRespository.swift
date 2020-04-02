@@ -28,6 +28,9 @@ struct FoodRepositoryImpl: FoodRepository {
             if let maximumDate = filters.maximumDate {
                 filter.filter(\.$expires < maximumDate)
             }
+            if let query = filters.query?.toSearchableQuery() {
+                filter.filter(\.$document, .custom("@@"), .custom("tsquery('\(query)')"))
+            }
         }
         .group(.or) { dateFilters in
             dateFilters.filter(\.$expires == nil)
@@ -80,5 +83,24 @@ struct FoodRepositoryImpl: FoodRepository {
     
     func delete(food: Food, on req: Request) -> EventLoopFuture<Void> {
         return food.delete(on: req.db)
+    }
+}
+
+extension QueryBuilder {
+    // MARK: Filter
+    
+    @discardableResult
+    public func filter<Field>(
+        _ field: KeyPath<Model, Field>,
+        _ method: DatabaseQuery.Filter.Method,
+        _ value: DatabaseQuery.Value
+    ) -> Self
+        where Field: FieldProtocol, Field.Model == Model
+    {
+        self.filter(
+            .path(Model.path(for: field), schema: Model.schema),
+            method,
+            value
+        )
     }
 }

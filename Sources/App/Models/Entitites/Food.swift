@@ -45,10 +45,16 @@ final class Food: Model, Content {
     
     @Timestamp(key: "updated_at", on: .update)
     var updatedAt: Date?
-
+    
+    @Field(key: "document")
+    var document: String?
+    
+    @Field(key: "language")
+    var language: String
+    
     init() { }
 
-    init(createRequest: CreateFoodRequest, creatorID: UUID) {
+    init(createRequest: CreateFoodRequest, creatorID: UUID, language: String) {
         self.title = createRequest.title
         self.description = createRequest.description
         self.$creator.id = creatorID
@@ -59,5 +65,6 @@ final class Food: Model, Content {
         self.lon = createRequest.lon
         self.expires = createRequest.expires
         self.showDistance = createRequest.showDistance
+        self.language = language
     }
 }
