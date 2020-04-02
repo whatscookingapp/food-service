@@ -21,11 +21,12 @@ struct FoodController: RouteCollection {
 private extension FoodController {
     
     func fetch(_ req: Request) throws -> EventLoopFuture<Page<FoodOverviewResponse>> {
+        let language = req.retrievePreferredLanguages().preferredLanguage()
         let filters = try req.query.decode(FilterRequest.self)
         let sorting = try req.query.decode(SortRequest.self)
         let sortingType = sorting.sorting ?? .dateDesc
         let imageTransformer = try req.application.makeImageTransformer()
-        return foodRepository.queryPaginated(filters: filters, sorting: sortingType, lat: sorting.lat, lon: sorting.lon, on: req).flatMapThrowing { page in
+        return foodRepository.queryPaginated(filters: filters, sorting: sortingType, lat: sorting.lat, lon: sorting.lon, language: language, on: req).flatMapThrowing { page in
             return try page.map { try FoodOverviewResponse(food: $0, lat: sorting.lat, lon: sorting.lon, imageTransformer: imageTransformer) }
         }
     }
