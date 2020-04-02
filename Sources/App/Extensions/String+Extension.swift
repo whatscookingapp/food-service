@@ -5,7 +5,7 @@ extension String {
     func toSearchableQuery() -> String {
         let characterSet = CharacterSet.alphanumerics.union(.whitespacesAndNewlines)
         let query = String(self.unicodeScalars.filter(characterSet.contains)).condenseWhitespace()
-        return query.split(separator: " ").joined(separator: " | ")
+        return query.split(separator: " ").map { $0 + ":*" }.joined(separator: " | ")
     }
     
     func condenseWhitespace() -> String {
