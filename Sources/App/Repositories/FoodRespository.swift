@@ -6,6 +6,7 @@ protocol FoodRepository {
     func queryPaginated(filters: FilterRequest, sorting: Sorting, lat: Double?, lon: Double?, language: String, on req: Request) -> EventLoopFuture<Page<Food>>
     func query(type: FoodType?, limit: Int, on req: Request) -> EventLoopFuture<[Food]>
     func find(id: UUID, on req: Request) -> EventLoopFuture<Food?>
+    func findComplete(id: UUID, on req: Request) -> EventLoopFuture<Food?>
     func save(food: Food, on req: Request) -> EventLoopFuture<Food>
     func delete(food: Food, on req: Request) -> EventLoopFuture<Void>
 }
@@ -89,30 +90,15 @@ struct FoodRepositoryImpl: FoodRepository {
         return Food.query(on: req.db).filter(\.$id == id).first()
     }
     
+    func findComplete(id: UUID, on req: Request) -> EventLoopFuture<Food?> {
+        return Food.query(on: req.db).filter(\.$id == id).join(Image.self, on: \Food.$imageID == \Image.$id, method: .left).with(\.$creator).first()
+    }
+    
     func save(food: Food, on req: Request) -> EventLoopFuture<Food> {
         return food.save(on: req.db).map { food }
     }
     
     func delete(food: Food, on req: Request) -> EventLoopFuture<Void> {
         return food.delete(on: req.db)
-    }
-}
-
-extension QueryBuilder {
-    // MARK: Filter
-    
-    @discardableResult
-    public func filter<Field>(
-        _ field: KeyPath<Model, Field>,
-        _ method: DatabaseQuery.Filter.Method,
-        _ value: DatabaseQuery.Value
-    ) -> Self
-        where Field: FieldProtocol, Field.Model == Model
-    {
-        self.filter(
-            .path(Model.path(for: field), schema: Model.schema),
-            method,
-            value
-        )
     }
 }

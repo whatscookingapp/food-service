@@ -13,6 +13,7 @@ struct FoodController: RouteCollection {
         let foodRoute = routes.grouped("food")
         foodRoute.get("", use: fetch)
         foodRoute.post("", use: create)
+        foodRoute.get(":id", use: details)
         foodRoute.patch(":id", use: update)
         foodRoute.delete(":id", use: delete)
     }
@@ -38,6 +39,16 @@ private extension FoodController {
         let food = Food(createRequest: createRequest, creatorID: userID, language: language)
         return foodRepository.save(food: food, on: req).flatMapThrowing {
             try CreateFoodResponse(id: $0.requireID())
+        }
+    }
+    
+    func details(_ req: Request) throws -> EventLoopFuture<FoodDetailResponse> {
+        guard let id: UUID = req.parameters.get("id") else {
+            throw Abort(.badRequest)
+        }
+        let imageTransformer = try req.application.makeImageTransformer()
+        return foodRepository.findComplete(id: id, on: req).unwrap(or: Abort(.notFound)).flatMapThrowing { food in
+            return try FoodDetailResponse(food: food, userID: req.userID, lat: nil, lon: nil, imageTransformer: imageTransformer)
         }
     }
     
