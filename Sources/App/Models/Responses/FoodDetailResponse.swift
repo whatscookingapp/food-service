@@ -30,7 +30,7 @@ struct FoodDetailResponse: Content {
         } else {
             self.distance = nil
         }
-        if !food.showDistance {
+        if !food.showDistance || self.isCreator {
             self.lat = food.lat
             self.lon = food.lon
         } else {

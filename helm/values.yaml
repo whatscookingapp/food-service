@@ -31,6 +31,13 @@ service:
         prefix: /discover/
         service: food-service:8080
         rewrite: /discover/
+        ---
+        apiVersion: ambassador/v2
+        kind:  Mapping
+        name:  food-service-participant
+        prefix: /participant/
+        service: food-service:8080
+        rewrite: /participant/
 
 resources: {}
   # We usually recommend not to specify default resources and to leave this as a conscious
