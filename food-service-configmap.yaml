@@ -10,3 +10,4 @@ data:
   DATABASE: "defaultdb"
   DATABASE_USER: "doadmin"
   IMAGE_HOST: "https://dru0ukfzkhf67.cloudfront.net"
+  PUSH_HOST: "http://push-service:8080"

@@ -30,6 +30,7 @@ public func configure(_ app: Application) throws {
     app.migrations.add(FoodAddShowDistance())
     app.migrations.add(FoodAddDocumentTrigger())
     app.migrations.add(FoodAddDocumentIndex())
+    app.migrations.add(CreateParticipant())
     
     try app.autoMigrate().wait()
     
@@ -43,5 +44,15 @@ extension Application {
             throw Abort(.internalServerError, reason: "IMAGE_HOST not configured")
         }
         return ImageTransformer(imageHost: imageHost)
+    }
+}
+
+extension Application {
+    
+    var pushClient: PushClient {
+        guard let pushHost = Environment.get("PUSH_HOST") else {
+            fatalError("PUSH_HOST env value not set")
+        }
+        return RemotePushClient(host: pushHost)
     }
 }

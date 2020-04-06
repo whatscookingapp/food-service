@@ -4,9 +4,12 @@ import Vapor
 struct FoodController: RouteCollection {
     
     private let foodRepository: FoodRepository
+    private let participantRepository: ParticipantRepository
     
-    init(foodRepository: FoodRepository) {
+    init(foodRepository: FoodRepository,
+         participantRepository: ParticipantRepository) {
         self.foodRepository = foodRepository
+        self.participantRepository = participantRepository
     }
     
     func boot(routes: RoutesBuilder) throws {
@@ -16,6 +19,7 @@ struct FoodController: RouteCollection {
         foodRoute.get(":id", use: details)
         foodRoute.patch(":id", use: update)
         foodRoute.delete(":id", use: delete)
+        foodRoute.get(":id", "participants", use: getParticipants)
     }
 }
 
@@ -28,7 +32,7 @@ private extension FoodController {
         let sortingType = sorting.sorting ?? .dateDesc
         let imageTransformer = try req.application.makeImageTransformer()
         return foodRepository.queryPaginated(filters: filters, sorting: sortingType, lat: sorting.lat, lon: sorting.lon, language: language, on: req).flatMapThrowing { page in
-            return try page.map { try FoodOverviewResponse(food: $0, lat: sorting.lat, lon: sorting.lon, imageTransformer: imageTransformer) }
+            try page.map { try FoodOverviewResponse(food: $0, lat: sorting.lat, lon: sorting.lon, imageTransformer: imageTransformer) }
         }
     }
     
@@ -46,9 +50,17 @@ private extension FoodController {
         guard let id: UUID = req.parameters.get("id") else {
             throw Abort(.badRequest)
         }
+        let userID = req.userID
         let imageTransformer = try req.application.makeImageTransformer()
-        return foodRepository.findComplete(id: id, on: req).unwrap(or: Abort(.notFound)).flatMapThrowing { food in
-            return try FoodDetailResponse(food: food, userID: req.userID, lat: nil, lon: nil, imageTransformer: imageTransformer)
+        return foodRepository.findComplete(id: id, on: req).unwrap(or: Abort(.notFound)).flatMap { food -> EventLoopFuture<(Participant?, Food)> in
+            if let userID = userID {
+                return self.participantRepository.find(userID: userID, foodID: id, on: req).and(value: food)
+            } else {
+                return req.eventLoop.makeSucceededFuture(nil).and(value: food)
+            }
+        }.flatMapThrowing { result in
+            let (participant, food) = result
+            return try FoodDetailResponse(food: food, participant: participant, userID: userID, lat: nil, lon: nil, imageTransformer: imageTransformer)
         }
     }
     
@@ -60,7 +72,7 @@ private extension FoodController {
         let updateRequest = try req.content.decode(UpdateFoodRequest.self)
         return foodRepository.find(id: id, on: req).unwrap(or: Abort(.notFound)).flatMap { food in
             guard food.$creator.id == userID else {
-                return req.eventLoop.makeFailedFuture(Abort(.unauthorized))
+                return req.eventLoop.makeFailedFuture(Abort(.forbidden))
             }
             food.title = updateRequest.title ?? food.title
             food.slots = updateRequest.slots ?? food.slots
@@ -80,9 +92,18 @@ private extension FoodController {
         let userID = try req.requireUserID()
         return foodRepository.find(id: id, on: req).unwrap(or: Abort(.notFound)).flatMap { food in
             guard food.$creator.id == userID else {
-                return req.eventLoop.makeFailedFuture(Abort(.unauthorized))
+                return req.eventLoop.makeFailedFuture(Abort(.forbidden))
             }
             return self.foodRepository.delete(food: food, on: req).transform(to: .ok)
+        }
+    }
+    
+    func getParticipants(_ req: Request) throws -> EventLoopFuture<Page<ParticipantResponse>> {
+        guard let id: UUID = req.parameters.get("id") else {
+            throw Abort(.badRequest)
+        }
+        return participantRepository.all(foodID: id, on: req).flatMapThrowing { page in
+            try page.map { try ParticipantResponse(participant: $0) }
         }
     }
 }
