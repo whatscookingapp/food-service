@@ -19,7 +19,8 @@ struct FoodDetailResponse: Content {
         self.title = food.title
         self.description = food.description
         self.creator = try UserResponse(user: food.creator)
-        self.isCreator = food.$creator.id == userID
+        let isCreator = food.$creator.id == userID
+        self.isCreator = isCreator
         if let approved = participant?.approved {
             self.status = approved ? .approved : .declined
         } else {
@@ -30,7 +31,7 @@ struct FoodDetailResponse: Content {
         } else {
             self.distance = nil
         }
-        if !food.showDistance || self.isCreator {
+        if !food.showDistance || isCreator {
             self.lat = food.lat
             self.lon = food.lon
         } else {

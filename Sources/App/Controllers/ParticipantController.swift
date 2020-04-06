@@ -39,7 +39,7 @@ private extension ParticipantController {
             let participant = Participant(userID: userID, foodID: addRequest.id)
             return self.participantRepository.save(participant: participant, on: req).map { _ in food }
         }.map { food -> HTTPStatus in
-            _ = req.application.pushClient.send(recipients: [food.$creator.id], title: "New join request", description: "There is a new join request for \"\(food.title)\"", additionalData: [:], on: req)
+            _ = req.application.pushClient.send(recipients: [food.$creator.id], title: "New join request", description: "There is a new join request for “\(food.title)”", additionalData: [:], on: req)
             return .ok
         }
     }
@@ -70,7 +70,7 @@ private extension ParticipantController {
                 return req.eventLoop.makeFailedFuture(Abort(.forbidden))
             }
             participant.approved = true
-            _ = req.application.pushClient.send(recipients: [food.$creator.id], title: "Join request approved", description: "Your request to join \"\(food.title)\" has been approved!", additionalData: [:], on: req)
+            _ = req.application.pushClient.send(recipients: [food.$creator.id], title: "Join request approved", description: "Your request to join “\(food.title)” has been approved!", additionalData: [:], on: req)
             return self.participantRepository.save(participant: participant, on: req).transform(to: .ok)
         }
     }
@@ -88,7 +88,7 @@ private extension ParticipantController {
                 return req.eventLoop.makeFailedFuture(Abort(.forbidden))
             }
             participant.approved = false
-            _ = req.application.pushClient.send(recipients: [food.$creator.id], title: "Join request declined", description: "Your request to join \"\(food.title)\" has been declined!", additionalData: [:], on: req)
+            _ = req.application.pushClient.send(recipients: [food.$creator.id], title: "Join request declined", description: "Your request to join “\(food.title)” has been declined!", additionalData: [:], on: req)
             return self.participantRepository.save(participant: participant, on: req).transform(to: .ok)
         }
     }
