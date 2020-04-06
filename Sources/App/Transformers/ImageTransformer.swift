@@ -10,8 +10,8 @@ struct ImageTransformer {
     
     func transform(bucket: String, key: String) throws -> ImageResponse {
         let thumbParameters = ProcessImageParameters(bucket: bucket, key: key, edits: .init(resize: .init(width: 100, height: 100, fit: .cover)))
-        let mediumParameters = ProcessImageParameters(bucket: bucket, key: key, edits: .init(resize: .init(width: 250, height: nil, fit: .cover)))
-        let largeParameters = ProcessImageParameters(bucket: bucket, key: key, edits: .init(resize: .init(width: 500, height: nil, fit: .cover)))
+        let mediumParameters = ProcessImageParameters(bucket: bucket, key: key, edits: .init(resize: .init(width: 500, height: nil, fit: .cover)))
+        let largeParameters = ProcessImageParameters(bucket: bucket, key: key, edits: .init(resize: .init(width: 1000, height: nil, fit: .cover)))
         let encoder = JSONEncoder()
         let thumb = try encoder.encode(thumbParameters).base64EncodedString()
         let medium = try encoder.encode(mediumParameters).base64EncodedString()
