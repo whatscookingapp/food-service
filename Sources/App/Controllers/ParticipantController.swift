@@ -23,7 +23,7 @@ struct ParticipantController: RouteCollection {
 
 private extension ParticipantController {
     
-    func addParticipant(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
+    func addParticipant(_ req: Request) throws -> EventLoopFuture<AddParticipantResponse> {
         let userID = try req.requireUserID()
         let addRequest = try req.content.decode(AddParticipantRequest.self)
         return foodRepository.find(id: addRequest.id, on: req).unwrap(or: Abort(.notFound)).flatMap { food -> EventLoopFuture<(Int, Food)> in
@@ -38,9 +38,9 @@ private extension ParticipantController {
             }
             let participant = Participant(userID: userID, foodID: addRequest.id)
             return self.participantRepository.save(participant: participant, on: req).map { _ in food }
-        }.map { food -> HTTPStatus in
+        }.flatMapThrowing { food -> AddParticipantResponse in
             _ = req.application.pushClient.send(recipients: [food.$creator.id], title: "New join request", description: "There is a new join request for “\(food.title)”", additionalData: [:], on: req)
-            return .ok
+            return AddParticipantResponse(id: try food.requireID())
         }
     }
     
