@@ -6,6 +6,7 @@ protocol ParticipantRepository {
     func findCount(userID: UUID, foodID: UUID, on req: Request) -> EventLoopFuture<Int>
     func find(userID: UUID, foodID: UUID, on req: Request) -> EventLoopFuture<Participant?>
     func find(id: UUID, on req: Request) -> EventLoopFuture<Participant?>
+    func findFull(id: UUID, on req: Request) -> EventLoopFuture<Participant?>
     func save(participant: Participant, on req: Request) -> EventLoopFuture<Participant>
     func delete(participant: Participant, on req: Request) -> EventLoopFuture<Void>
     func all(foodID: UUID, on req: Request) -> EventLoopFuture<Page<Participant>>
@@ -19,11 +20,15 @@ struct ParticipantRepositoryImpl: ParticipantRepository {
     }
     
     func find(userID: UUID, foodID: UUID, on req: Request) -> EventLoopFuture<Participant?> {
-        Participant.query(on: req.db).filter(\.$user.$id == userID).filter(\.$food.$id == foodID).first()
+        Participant.query(on: req.db).filter(\.$user.$id == userID).filter(\.$food.$id == foodID).with(\.$user).first()
     }
     
     func find(id: UUID, on req: Request) -> EventLoopFuture<Participant?> {
         Participant.query(on: req.db).filter(\.$id == id).first()
+    }
+    
+    func findFull(id: UUID, on req: Request) -> EventLoopFuture<Participant?> {
+        Participant.query(on: req.db).filter(\.$id == id).with(\.$user).first()
     }
     
     func save(participant: Participant, on req: Request) -> EventLoopFuture<Participant> {

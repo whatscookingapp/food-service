@@ -40,8 +40,11 @@ private extension ParticipantController {
             return self.participantRepository.save(participant: participant, on: req).and(value: food)
         }.flatMap { result in
             let (participant, food) = result
+            guard let id = participant.id else {
+                return req.eventLoop.makeFailedFuture(Abort(.internalServerError))
+            }
             _ = req.application.pushClient.send(recipients: [food.$creator.id], title: "New join request", description: "There is a new join request for “\(food.title)”", additionalData: [:], on: req)
-            return participant.$user.load(on: req.db).flatMapThrowing { try ParticipantResponse(participant: participant) }
+            return self.participantRepository.findFull(id: id, on: req).unwrap(or: Abort(.notFound)).flatMapThrowing { try ParticipantResponse(participant: $0) }
         }
     }
     
