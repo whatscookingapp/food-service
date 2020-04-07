@@ -26,7 +26,7 @@ struct FoodDetailResponse: Content {
         if let approved = participant?.approved {
             self.status = approved ? .approved : .declined
         } else {
-            self.status = .unknown
+            self.status = participant == nil ? .unknown : .pending
         }
         if let inputLat = lat, let inputLon = lon, let foodLat = food.lat, let foodLon = food.lon {
             self.distance = Double.distance(lat1: inputLat, lon1: inputLon, lat2: foodLat, lon2: foodLon)
