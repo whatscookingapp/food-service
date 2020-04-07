@@ -53,14 +53,25 @@ private extension FoodController {
         let userID = req.userID
         let imageTransformer = try req.application.makeImageTransformer()
         return foodRepository.findComplete(id: id, on: req).unwrap(or: Abort(.notFound)).flatMap { food -> EventLoopFuture<(Participant?, Food)> in
-            if let userID = userID {
+            if let userID = userID, food.$creator.id != userID {
                 return self.participantRepository.find(userID: userID, foodID: id, on: req).and(value: food)
             } else {
                 return req.eventLoop.makeSucceededFuture(nil).and(value: food)
             }
-        }.flatMapThrowing { result in
+        }.flatMap { result in
             let (participant, food) = result
-            return try FoodDetailResponse(food: food, participant: participant, userID: userID, lat: nil, lon: nil, imageTransformer: imageTransformer)
+            if userID == food.$creator.id {
+                return self.participantRepository.all(foodID: id, on: req).flatMapThrowing { participants in
+                    return try FoodDetailResponse(food: food, participant: participant, userID: userID, lat: nil, lon: nil, imageTransformer: imageTransformer, participants: participants)
+                }
+            } else {
+                do {
+                    let response = try FoodDetailResponse(food: food, participant: participant, userID: userID, lat: nil, lon: nil, imageTransformer: imageTransformer, participants: nil)
+                    return req.eventLoop.makeSucceededFuture(response)
+                } catch {
+                    return req.eventLoop.makeFailedFuture(error)
+                }
+            }
         }
     }
     

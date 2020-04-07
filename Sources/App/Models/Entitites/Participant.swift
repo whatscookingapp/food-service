@@ -27,6 +27,5 @@ final class Participant: Model, Content {
     init(userID: UUID, foodID: UUID) {
         self.$user.id = userID
         self.$food.id = foodID
-        self.approved = false
     }
 }
