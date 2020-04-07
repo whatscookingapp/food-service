@@ -67,7 +67,7 @@ private extension FoodController {
             }
         }.flatMapThrowing { result in
             let ((participants, participant), food) = result
-            return try FoodDetailResponse(food: food, participant: participant, userID: userID, lat: nil, lon: nil, imageTransformer: imageTransformer, participants: participants)
+            return try FoodDetailResponse(food: food, userID: userID, lat: nil, lon: nil, imageTransformer: imageTransformer, participant: participant, participants: participants)
         }
     }
     

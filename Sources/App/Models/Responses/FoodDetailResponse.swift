@@ -8,26 +8,21 @@ struct FoodDetailResponse: Content {
     let description: String?
     let creator: UserResponse
     let isCreator: Bool
-    let status: ParticipantStatus
     let distance: Double?
     let lat: Double?
     let lon: Double?
     let image: ImageResponse?
     let createdAt: Date?
+    let participant: ParticipantResponse?
     let participants: [ParticipantResponse]
     
-    init(food: Food, participant: Participant?, userID: UUID?, lat: Double?, lon: Double?, imageTransformer: ImageTransformer, participants: [Participant]) throws {
+    init(food: Food, userID: UUID?, lat: Double?, lon: Double?, imageTransformer: ImageTransformer, participant: Participant?, participants: [Participant]) throws {
         self.id = try food.requireID()
         self.title = food.title
         self.description = food.description
         self.creator = try UserResponse(user: food.creator)
         let isCreator = food.$creator.id == userID
         self.isCreator = isCreator
-        if let approved = participant?.approved {
-            self.status = approved ? .approved : .declined
-        } else {
-            self.status = participant == nil ? .unknown : .pending
-        }
         if let inputLat = lat, let inputLon = lon, let foodLat = food.lat, let foodLon = food.lon {
             self.distance = Double.distance(lat1: inputLat, lon1: inputLon, lat2: foodLat, lon2: foodLon)
         } else {
@@ -47,6 +42,11 @@ struct FoodDetailResponse: Content {
             self.image = nil
         }
         self.createdAt = food.createdAt
+        if let participant = participant {
+            self.participant = try ParticipantResponse(participant: participant)
+        } else {
+            self.participant = nil
+        }
         self.participants = try participants.map { try ParticipantResponse(participant: $0) }
     }
 }
