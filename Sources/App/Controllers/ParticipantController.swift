@@ -23,7 +23,7 @@ struct ParticipantController: RouteCollection {
 
 private extension ParticipantController {
     
-    func addParticipant(_ req: Request) throws -> EventLoopFuture<AddParticipantResponse> {
+    func addParticipant(_ req: Request) throws -> EventLoopFuture<ParticipantResponse> {
         let userID = try req.requireUserID()
         let addRequest = try req.content.decode(AddParticipantRequest.self)
         return foodRepository.find(id: addRequest.id, on: req).unwrap(or: Abort(.notFound)).flatMap { food -> EventLoopFuture<(Int, Food)> in
@@ -31,16 +31,17 @@ private extension ParticipantController {
                 return req.eventLoop.makeFailedFuture(Abort(.badRequest))
             }
             return self.participantRepository.findCount(userID: userID, foodID: addRequest.id, on: req).and(value: food)
-        }.flatMap { value -> EventLoopFuture<Food> in
+        }.flatMap { value -> EventLoopFuture<(Participant, Food)> in
             let (count, food) = value
             guard count == 0 else {
                 return req.eventLoop.makeFailedFuture(Abort(.badRequest))
             }
             let participant = Participant(userID: userID, foodID: addRequest.id)
-            return self.participantRepository.save(participant: participant, on: req).map { _ in food }
-        }.flatMapThrowing { food -> AddParticipantResponse in
+            return self.participantRepository.save(participant: participant, on: req).and(value: food)
+        }.flatMap { result in
+            let (participant, food) = result
             _ = req.application.pushClient.send(recipients: [food.$creator.id], title: "New join request", description: "There is a new join request for “\(food.title)”", additionalData: [:], on: req)
-            return AddParticipantResponse(id: try food.requireID())
+            return participant.$user.load(on: req.db).flatMapThrowing { try ParticipantResponse(participant: participant) }
         }
     }
     
