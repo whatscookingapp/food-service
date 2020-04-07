@@ -11,7 +11,7 @@ struct ParticipantResponse: Content {
         if let approved = participant.approved {
             self.status = approved ? .approved : .declined
         } else {
-            self.status = .unknown
+            self.status = .pending
         }
         self.user = try UserResponse(user: participant.user)
     }
