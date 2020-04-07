@@ -14,9 +14,9 @@ struct FoodDetailResponse: Content {
     let lon: Double?
     let image: ImageResponse?
     let createdAt: Date?
-    let participants: Page<ParticipantResponse>?
+    let participants: [ParticipantResponse]
     
-    init(food: Food, participant: Participant?, userID: UUID?, lat: Double?, lon: Double?, imageTransformer: ImageTransformer, participants: Page<Participant>?) throws {
+    init(food: Food, participant: Participant?, userID: UUID?, lat: Double?, lon: Double?, imageTransformer: ImageTransformer, participants: [Participant]) throws {
         self.id = try food.requireID()
         self.title = food.title
         self.description = food.description
@@ -47,6 +47,6 @@ struct FoodDetailResponse: Content {
             self.image = nil
         }
         self.createdAt = food.createdAt
-        self.participants = try participants?.map { try ParticipantResponse(participant: $0) }
+        self.participants = try participants.map { try ParticipantResponse(participant: $0) }
     }
 }

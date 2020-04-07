@@ -9,6 +9,7 @@ protocol ParticipantRepository {
     func save(participant: Participant, on req: Request) -> EventLoopFuture<Participant>
     func delete(participant: Participant, on req: Request) -> EventLoopFuture<Void>
     func all(foodID: UUID, on req: Request) -> EventLoopFuture<Page<Participant>>
+    func fetch(foodID: UUID, limit: Int, on req: Request) -> EventLoopFuture<[Participant]>
 }
 
 struct ParticipantRepositoryImpl: ParticipantRepository {
@@ -35,5 +36,9 @@ struct ParticipantRepositoryImpl: ParticipantRepository {
     
     func all(foodID: UUID, on req: Request) -> EventLoopFuture<Page<Participant>> {
         Participant.query(on: req.db).filter(\.$food.$id == foodID).with(\.$user).paginate(for: req)
+    }
+    
+    func fetch(foodID: UUID, limit: Int, on req: Request) -> EventLoopFuture<[Participant]> {
+        Participant.query(on: req.db).filter(\.$food.$id == foodID).with(\.$user).limit(limit).all()
     }
 }

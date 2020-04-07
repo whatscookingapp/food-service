@@ -58,20 +58,16 @@ private extension FoodController {
             } else {
                 return req.eventLoop.makeSucceededFuture(nil).and(value: food)
             }
-        }.flatMap { result in
+        }.flatMap { result -> EventLoopFuture<(([Participant], Participant?), Food)> in
             let (participant, food) = result
             if userID == food.$creator.id {
-                return self.participantRepository.all(foodID: id, on: req).flatMapThrowing { participants in
-                    return try FoodDetailResponse(food: food, participant: participant, userID: userID, lat: nil, lon: nil, imageTransformer: imageTransformer, participants: participants)
-                }
+                return self.participantRepository.fetch(foodID: id, limit: 5, on: req).and(value: participant).and(value: food)
             } else {
-                do {
-                    let response = try FoodDetailResponse(food: food, participant: participant, userID: userID, lat: nil, lon: nil, imageTransformer: imageTransformer, participants: nil)
-                    return req.eventLoop.makeSucceededFuture(response)
-                } catch {
-                    return req.eventLoop.makeFailedFuture(error)
-                }
+                return req.eventLoop.makeSucceededFuture([]).and(value: participant).and(value: food)
             }
+        }.flatMapThrowing { result in
+            let ((participants, participant), food) = result
+            return try FoodDetailResponse(food: food, participant: participant, userID: userID, lat: nil, lon: nil, imageTransformer: imageTransformer, participants: participants)
         }
     }
     
