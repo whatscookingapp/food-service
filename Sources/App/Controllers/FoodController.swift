@@ -109,8 +109,9 @@ private extension FoodController {
         guard let id: UUID = req.parameters.get("id") else {
             throw Abort(.badRequest)
         }
+        let imageTransformer = try req.application.makeImageTransformer()
         return participantRepository.all(foodID: id, on: req).flatMapThrowing { page in
-            try page.map { try ParticipantResponse(participant: $0) }
+            try page.map { try ParticipantResponse(participant: $0, imageTransformer: imageTransformer) }
         }
     }
 }

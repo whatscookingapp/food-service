@@ -6,13 +6,13 @@ struct ParticipantResponse: Content {
     let status: ParticipantStatus
     let user: UserResponse
     
-    init(participant: Participant) throws {
+    init(participant: Participant, imageTransformer: ImageTransformer) throws {
         self.id = try participant.requireID()
         if let approved = participant.approved {
             self.status = approved ? .approved : .declined
         } else {
             self.status = .pending
         }
-        self.user = try UserResponse(user: participant.user)
+        self.user = try UserResponse(user: participant.user, imageTransformer: imageTransformer)
     }
 }

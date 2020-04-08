@@ -20,7 +20,7 @@ struct FoodDetailResponse: Content {
         self.id = try food.requireID()
         self.title = food.title
         self.description = food.description
-        self.creator = try UserResponse(user: food.creator)
+        self.creator = try UserResponse(user: food.creator, imageTransformer: imageTransformer)
         let isCreator = food.$creator.id == userID
         self.isCreator = isCreator
         if let inputLat = lat, let inputLon = lon, let foodLat = food.lat, let foodLon = food.lon {
@@ -43,10 +43,10 @@ struct FoodDetailResponse: Content {
         }
         self.createdAt = food.createdAt
         if let participant = participant {
-            self.participant = try ParticipantResponse(participant: participant)
+            self.participant = try ParticipantResponse(participant: participant, imageTransformer: imageTransformer)
         } else {
             self.participant = nil
         }
-        self.participants = try participants.map { try ParticipantResponse(participant: $0) }
+        self.participants = try participants.map { try ParticipantResponse(participant: $0, imageTransformer: imageTransformer) }
     }
 }

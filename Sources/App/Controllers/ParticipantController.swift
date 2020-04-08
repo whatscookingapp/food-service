@@ -26,6 +26,7 @@ private extension ParticipantController {
     func addParticipant(_ req: Request) throws -> EventLoopFuture<ParticipantResponse> {
         let userID = try req.requireUserID()
         let addRequest = try req.content.decode(AddParticipantRequest.self)
+        let imageTransformer = try req.application.makeImageTransformer()
         return foodRepository.find(id: addRequest.id, on: req).unwrap(or: Abort(.notFound)).flatMap { food -> EventLoopFuture<(Int, Food)> in
             guard food.$creator.id != userID else {
                 return req.eventLoop.makeFailedFuture(Abort(.badRequest))
@@ -43,8 +44,8 @@ private extension ParticipantController {
             guard let id = participant.id else {
                 return req.eventLoop.makeFailedFuture(Abort(.internalServerError))
             }
-            _ = req.application.pushClient.send(recipients: [food.$creator.id], title: "New join request", description: "There is a new join request for “\(food.title)”", additionalData: [:], on: req)
-            return self.participantRepository.findFull(id: id, on: req).unwrap(or: Abort(.notFound)).flatMapThrowing { try ParticipantResponse(participant: $0) }
+            _ = req.application.pushClient.send(recipients: [food.$creator.id], title: "New join request", description: "There is a new join request for “\(food.title)”", additionalData: ["id": addRequest.id.uuidString], on: req)
+            return self.participantRepository.findFull(id: id, on: req).unwrap(or: Abort(.notFound)).flatMapThrowing { try ParticipantResponse(participant: $0, imageTransformer: imageTransformer) }
         }
     }
     
@@ -73,8 +74,11 @@ private extension ParticipantController {
             guard food.$creator.id == userID else {
                 return req.eventLoop.makeFailedFuture(Abort(.forbidden))
             }
+            guard let foodID = try? food.requireID() else {
+                return req.eventLoop.makeFailedFuture(Abort(.internalServerError))
+            }
             participant.approved = true
-            _ = req.application.pushClient.send(recipients: [food.$creator.id], title: "Join request approved", description: "Your request to join “\(food.title)” has been approved!", additionalData: [:], on: req)
+            _ = req.application.pushClient.send(recipients: [food.$creator.id], title: "Join request approved", description: "Your request to join “\(food.title)” has been approved!", additionalData: ["id": foodID.uuidString], on: req)
             return self.participantRepository.save(participant: participant, on: req).transform(to: .ok)
         }
     }
@@ -91,8 +95,11 @@ private extension ParticipantController {
             guard food.$creator.id == userID else {
                 return req.eventLoop.makeFailedFuture(Abort(.forbidden))
             }
+            guard let foodID = try? food.requireID() else {
+                return req.eventLoop.makeFailedFuture(Abort(.internalServerError))
+            }
             participant.approved = false
-            _ = req.application.pushClient.send(recipients: [food.$creator.id], title: "Join request declined", description: "Your request to join “\(food.title)” has been declined!", additionalData: [:], on: req)
+            _ = req.application.pushClient.send(recipients: [food.$creator.id], title: "Join request declined", description: "Your request to join “\(food.title)” has been declined!", additionalData: ["id": foodID.uuidString], on: req)
             return self.participantRepository.save(participant: participant, on: req).transform(to: .ok)
         }
     }

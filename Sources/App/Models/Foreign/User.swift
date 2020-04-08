@@ -10,8 +10,11 @@ final class User: Model, Content {
     @Field(key: "name")
     var name: String
     
-    @Field(key: "image")
-    var image: String?
+    @Field(key: "bucket")
+    var bucket: String?
+    
+    @Field(key: "key")
+    var key: String?
 
     init() { }
 }

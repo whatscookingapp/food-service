@@ -12,7 +12,7 @@ struct FoodOverviewResponse: Content {
     init(food: Food, lat: Double?, lon: Double?, imageTransformer: ImageTransformer) throws {
         self.id = try food.requireID()
         self.title = food.title
-        self.creator = try UserResponse(user: food.creator)
+        self.creator = try UserResponse(user: food.creator, imageTransformer: imageTransformer)
         if let inputLat = lat, let inputLon = lon, let foodLat = food.lat, let foodLon = food.lon {
             self.distance = Double.distance(lat1: inputLat, lon1: inputLon, lat2: foodLat, lon2: foodLon)
         } else {
