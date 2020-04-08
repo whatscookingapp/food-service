@@ -78,7 +78,7 @@ private extension ParticipantController {
                 return req.eventLoop.makeFailedFuture(Abort(.internalServerError))
             }
             participant.approved = true
-            _ = req.application.pushClient.send(recipients: [food.$creator.id], title: "Join request approved", description: "Your request to join “\(food.title)” has been approved!", additionalData: ["id": foodID.uuidString], on: req)
+            _ = req.application.pushClient.send(recipients: [participant.$user.id], title: "Join request approved", description: "Your request to join “\(food.title)” has been approved!", additionalData: ["id": foodID.uuidString], on: req)
             return self.participantRepository.save(participant: participant, on: req).transform(to: .ok)
         }
     }
@@ -99,7 +99,7 @@ private extension ParticipantController {
                 return req.eventLoop.makeFailedFuture(Abort(.internalServerError))
             }
             participant.approved = false
-            _ = req.application.pushClient.send(recipients: [food.$creator.id], title: "Join request declined", description: "Your request to join “\(food.title)” has been declined!", additionalData: ["id": foodID.uuidString], on: req)
+            _ = req.application.pushClient.send(recipients: [participant.$user.id], title: "Join request declined", description: "Your request to join “\(food.title)” has been declined!", additionalData: ["id": foodID.uuidString], on: req)
             return self.participantRepository.save(participant: participant, on: req).transform(to: .ok)
         }
     }
