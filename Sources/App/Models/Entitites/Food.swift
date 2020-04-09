@@ -19,8 +19,8 @@ final class Food: Model, Content {
     @Enum(key: "type")
     var type: FoodType
     
-    @Field(key: "image_id")
-    var imageID: UUID?
+    @OptionalParent(key: "image_id")
+    var image: Image?
     
     @Field(key: "slots")
     var slots: Int?

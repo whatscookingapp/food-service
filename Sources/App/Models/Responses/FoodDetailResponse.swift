@@ -35,8 +35,7 @@ struct FoodDetailResponse: Content {
             self.lat = nil
             self.lon = nil
         }
-        let image = try food.joined(Image.self)
-        if let bucket = image.bucket, let key = image.key {
+        if let bucket = food.image?.bucket, let key = food.image?.key {
             self.image = try imageTransformer.transform(bucket: bucket, key: key)
         } else {
             self.image = nil

@@ -5,6 +5,7 @@ protocol ParticipantRepository {
     
     func findCount(userID: UUID, foodID: UUID, on req: Request) -> EventLoopFuture<Int>
     func find(userID: UUID, foodID: UUID, on req: Request) -> EventLoopFuture<Participant?>
+    func find(userID: UUID, on req: Request) -> EventLoopFuture<Page<Participant>>
     func find(id: UUID, on req: Request) -> EventLoopFuture<Participant?>
     func findFull(id: UUID, on req: Request) -> EventLoopFuture<Participant?>
     func save(participant: Participant, on req: Request) -> EventLoopFuture<Participant>
@@ -21,6 +22,14 @@ struct ParticipantRepositoryImpl: ParticipantRepository {
     
     func find(userID: UUID, foodID: UUID, on req: Request) -> EventLoopFuture<Participant?> {
         Participant.query(on: req.db).filter(\.$user.$id == userID).filter(\.$food.$id == foodID).with(\.$user).first()
+    }
+    
+    func find(userID: UUID, on req: Request) -> EventLoopFuture<Page<Participant>> {
+        Participant.query(on: req.db)
+            .filter(\.$user.$id == userID)
+            .with(\.$food) {
+                $0.with(\.$creator)
+        }.paginate(for: req)
     }
     
     func find(id: UUID, on req: Request) -> EventLoopFuture<Participant?> {

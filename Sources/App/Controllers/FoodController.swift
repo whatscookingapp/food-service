@@ -91,7 +91,7 @@ private extension FoodController {
             food.lat = updateRequest.lat ?? food.lat
             food.lon = updateRequest.lon ?? food.lon
             food.expires = updateRequest.expires ?? food.expires
-            food.imageID = updateRequest.imageID ?? food.imageID
+            food.$image.id = updateRequest.imageID ?? food.$image.id
             return self.foodRepository.save(food: food, on: req).transform(to: .ok)
         }
     }

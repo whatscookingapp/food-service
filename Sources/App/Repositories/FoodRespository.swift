@@ -50,7 +50,7 @@ struct FoodRepositoryImpl: FoodRepository {
             dateFilters.filter(\.$expires == nil)
             dateFilters.filter(\.$expires > Date())
         }
-        .join(Image.self, on: \Food.$imageID == \Image.$id, method: .left)
+        .with(\.$image)
         .with(\.$creator)
             
         switch sorting {
@@ -77,12 +77,12 @@ struct FoodRepositoryImpl: FoodRepository {
                 filter.filter(\.$type == .enumCase(type.rawValue))
             }
         }
-        .join(Image.self, on: \Food.$imageID == \Image.$id, method: .left)
         .group(.or) { dateFilters in
             dateFilters.filter(\.$expires == nil)
             dateFilters.filter(\.$expires > Date())
         }
         .sort(\.$createdAt, .descending)
+        .with(\.$image)
         .with(\.$creator)
         .all()
     }
@@ -92,7 +92,7 @@ struct FoodRepositoryImpl: FoodRepository {
     }
     
     func findComplete(id: UUID, on req: Request) -> EventLoopFuture<Food?> {
-        return Food.query(on: req.db).filter(\.$id == id).join(Image.self, on: \Food.$imageID == \Image.$id, method: .left).with(\.$creator).first()
+        return Food.query(on: req.db).filter(\.$id == id).with(\.$image).with(\.$creator).first()
     }
     
     func save(food: Food, on req: Request) -> EventLoopFuture<Food> {
@@ -110,7 +110,7 @@ struct FoodRepositoryImpl: FoodRepository {
                 dateFilters.filter(\.$expires == nil)
                 dateFilters.filter(\.$expires > Date())
         }
-        .join(Image.self, on: \Food.$imageID == \Image.$id, method: .left)
+        .with(\.$image)
         .with(\.$creator)
         .sort(\.$createdAt, .descending)
         .paginate(for: req)

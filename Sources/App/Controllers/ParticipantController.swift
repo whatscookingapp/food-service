@@ -14,6 +14,7 @@ struct ParticipantController: RouteCollection {
     
     func boot(routes: RoutesBuilder) throws {
         let participantRoute = routes.grouped("participant")
+        participantRoute.get("", use: getParticipants)
         participantRoute.post("", use: addParticipant)
         participantRoute.delete(":id", use: deleteParticipant)
         participantRoute.post(":id", "accept", use: acceptParticipant)
@@ -22,6 +23,14 @@ struct ParticipantController: RouteCollection {
 }
 
 private extension ParticipantController {
+    
+    func getParticipants(_ req: Request) throws -> EventLoopFuture<Page<ParticipantWithFoodResponse>> {
+        let userID = try req.requireUserID()
+        let imageTransformer = try req.application.makeImageTransformer()
+        return participantRepository.find(userID: userID, on: req).flatMapThrowing { page in
+            try page.map { try ParticipantWithFoodResponse(participant: $0, imageTransformer: imageTransformer) }
+        }
+    }
     
     func addParticipant(_ req: Request) throws -> EventLoopFuture<ParticipantResponse> {
         let userID = try req.requireUserID()
