@@ -9,6 +9,7 @@ protocol FoodRepository {
     func findComplete(id: UUID, on req: Request) -> EventLoopFuture<Food?>
     func save(food: Food, on req: Request) -> EventLoopFuture<Food>
     func delete(food: Food, on req: Request) -> EventLoopFuture<Void>
+    func query(userID: UUID, on req: Request) -> EventLoopFuture<Page<Food>>
 }
 
 struct FoodRepositoryImpl: FoodRepository {
@@ -100,5 +101,18 @@ struct FoodRepositoryImpl: FoodRepository {
     
     func delete(food: Food, on req: Request) -> EventLoopFuture<Void> {
         return food.delete(on: req.db)
+    }
+    
+    func query(userID: UUID, on req: Request) -> EventLoopFuture<Page<Food>> {
+        return Food.query(on: req.db)
+            .filter(\.$creator.$id == userID)
+            .group(.or) { dateFilters in
+                dateFilters.filter(\.$expires == nil)
+                dateFilters.filter(\.$expires > Date())
+        }
+        .join(Image.self, on: \Food.$imageID == \Image.$id, method: .left)
+        .with(\.$creator)
+        .sort(\.$createdAt, .descending)
+        .paginate(for: req)
     }
 }

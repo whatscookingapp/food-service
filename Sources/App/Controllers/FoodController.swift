@@ -20,6 +20,10 @@ struct FoodController: RouteCollection {
         foodRoute.patch(":id", use: update)
         foodRoute.delete(":id", use: delete)
         foodRoute.get(":id", "participants", use: getParticipants)
+        
+        let foodUserRoute = foodRoute.grouped("user")
+        foodUserRoute.get(":id", use: getUserFood)
+        foodUserRoute.get("", use: getCurrentUserFood)
     }
 }
 
@@ -112,6 +116,24 @@ private extension FoodController {
         let imageTransformer = try req.application.makeImageTransformer()
         return participantRepository.all(foodID: id, on: req).flatMapThrowing { page in
             try page.map { try ParticipantResponse(participant: $0, imageTransformer: imageTransformer) }
+        }
+    }
+    
+    func getUserFood(_ req: Request) throws -> EventLoopFuture<Page<FoodOverviewResponse>> {
+        guard let userID: UUID = req.parameters.get("id") else {
+            throw Abort(.badRequest)
+        }
+        let imageTransformer = try req.application.makeImageTransformer()
+        return foodRepository.query(userID: userID, on: req).flatMapThrowing { page in
+            try page.map { try FoodOverviewResponse(food: $0, lat: nil, lon: nil, imageTransformer: imageTransformer) }
+        }
+    }
+    
+    func getCurrentUserFood(_ req: Request) throws -> EventLoopFuture<Page<FoodOverviewResponse>> {
+        let userID = try req.requireUserID()
+        let imageTransformer = try req.application.makeImageTransformer()
+        return foodRepository.query(userID: userID, on: req).flatMapThrowing { page in
+            try page.map { try FoodOverviewResponse(food: $0, lat: nil, lon: nil, imageTransformer: imageTransformer) }
         }
     }
 }
