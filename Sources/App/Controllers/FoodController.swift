@@ -130,7 +130,7 @@ private extension FoodController {
         let userID = try req.requireUserID()
         return foodReportRepository.find(itemID: id, reporterID: userID, on: req).flatMap { report in
             guard report == nil else {
-                return req.eventLoop.makeSucceededFuture(.notModified)
+                return req.eventLoop.makeSucceededFuture(.ok)
             }
             let report = FoodReport(itemID: id, reporterID: userID)
             return self.foodReportRepository.save(report: report, on: req).transform(to: .ok)
