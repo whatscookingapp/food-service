@@ -7,7 +7,7 @@ func routes(_ app: Application) throws {
         return .ok
     }
 
-    try app.register(collection: FoodController(foodRepository: FoodRepositoryImpl(), participantRepository: ParticipantRepositoryImpl()))
+    try app.register(collection: FoodController(foodRepository: FoodRepositoryImpl(), participantRepository: ParticipantRepositoryImpl(), foodReportRepository: FoodReportRepositoryImpl()))
     try app.register(collection: DiscoverController(foodRepository: FoodRepositoryImpl()))
     try app.register(collection: ParticipantController(foodRepository: FoodRepositoryImpl(), participantRepository: ParticipantRepositoryImpl()))
 }

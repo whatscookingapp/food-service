@@ -31,6 +31,7 @@ public func configure(_ app: Application) throws {
     app.migrations.add(FoodAddDocumentTrigger())
     app.migrations.add(FoodAddDocumentIndex())
     app.migrations.add(CreateParticipant())
+    app.migrations.add(CreateFoodReport())
     
     try app.autoMigrate().wait()
     

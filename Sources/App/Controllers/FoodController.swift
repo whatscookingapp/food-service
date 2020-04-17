@@ -5,11 +5,14 @@ struct FoodController: RouteCollection {
     
     private let foodRepository: FoodRepository
     private let participantRepository: ParticipantRepository
+    private let foodReportRepository: FoodReportRepository
     
     init(foodRepository: FoodRepository,
-         participantRepository: ParticipantRepository) {
+         participantRepository: ParticipantRepository,
+         foodReportRepository: FoodReportRepository) {
         self.foodRepository = foodRepository
         self.participantRepository = participantRepository
+        self.foodReportRepository = foodReportRepository
     }
     
     func boot(routes: RoutesBuilder) throws {
@@ -20,6 +23,7 @@ struct FoodController: RouteCollection {
         foodRoute.patch(":id", use: update)
         foodRoute.delete(":id", use: delete)
         foodRoute.get(":id", "participants", use: getParticipants)
+        foodRoute.post(":id", "report", use: report)
         
         let foodUserRoute = foodRoute.grouped("user")
         foodUserRoute.get(":id", use: getUserFood)
@@ -116,6 +120,20 @@ private extension FoodController {
         let imageTransformer = try req.application.makeImageTransformer()
         return participantRepository.all(foodID: id, on: req).flatMapThrowing { page in
             try page.map { try ParticipantResponse(participant: $0, imageTransformer: imageTransformer) }
+        }
+    }
+    
+    func report(_ req: Request) throws -> EventLoopFuture<HTTPStatus> {
+        guard let id: UUID = req.parameters.get("id") else {
+            throw Abort(.badRequest)
+        }
+        let userID = try req.requireUserID()
+        return foodReportRepository.find(itemID: id, reporterID: userID, on: req).flatMap { report in
+            guard report == nil else {
+                return req.eventLoop.makeSucceededFuture(.notModified)
+            }
+            let report = FoodReport(itemID: id, reporterID: userID)
+            return self.foodReportRepository.save(report: report, on: req).transform(to: .ok)
         }
     }
     

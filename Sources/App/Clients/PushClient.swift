@@ -16,7 +16,7 @@ final class RemotePushClient: PushClient {
     
     func send(recipients: [UUID], title: String, description: String, additionalData: [String: String], on request: Request) -> EventLoopFuture<HTTPStatus> {
         let url = host + "/push"
-        let requestBody = SendPushRequest(recipients: recipients, title: title, description: description, additionalData: additionalData)
+        let requestBody = SendPushRequest(recipients: recipients, title: title, description: description, isContentAvailable: false, additionalData: additionalData)
         return request.client.post(.init(string: url), headers: request.headers) { request in
             try request.content.encode(requestBody)
         }.flatMapThrowing { response in
