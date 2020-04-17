@@ -8,11 +8,16 @@ struct FoodDetailResponse: Content {
     let description: String?
     let creator: UserResponse
     let isCreator: Bool
+    let type: FoodType
+    let bringContainer: Bool
     let distance: Double?
     let lat: Double?
     let lon: Double?
+    let showDistance: Bool?
+    let slots: Int?
     let image: ImageResponse?
     let createdAt: Date?
+    let expires: Date?
     let participant: ParticipantResponse?
     let participants: [ParticipantResponse]
     
@@ -23,6 +28,8 @@ struct FoodDetailResponse: Content {
         self.creator = try UserResponse(user: food.creator, imageTransformer: imageTransformer)
         let isCreator = food.$creator.id == userID
         self.isCreator = isCreator
+        self.type = food.type
+        self.bringContainer = food.bringContainer
         if let inputLat = lat, let inputLon = lon, let foodLat = food.lat, let foodLon = food.lon {
             self.distance = Double.distance(lat1: inputLat, lon1: inputLon, lat2: foodLat, lon2: foodLon)
         } else {
@@ -35,12 +42,20 @@ struct FoodDetailResponse: Content {
             self.lat = nil
             self.lon = nil
         }
+        if isCreator {
+            self.showDistance = food.showDistance
+            self.slots = food.slots
+        } else {
+            self.showDistance = nil
+            self.slots = nil
+        }
         if let bucket = food.image?.bucket, let key = food.image?.key {
             self.image = try imageTransformer.transform(bucket: bucket, key: key)
         } else {
             self.image = nil
         }
         self.createdAt = food.createdAt
+        self.expires = food.expires
         if let participant = participant {
             self.participant = try ParticipantResponse(participant: participant, imageTransformer: imageTransformer)
         } else {
