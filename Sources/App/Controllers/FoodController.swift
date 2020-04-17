@@ -90,10 +90,13 @@ private extension FoodController {
                 return req.eventLoop.makeFailedFuture(Abort(.forbidden))
             }
             food.title = updateRequest.title ?? food.title
+            food.description = updateRequest.description ?? food.description
+            food.type = updateRequest.type ?? food.type
             food.slots = updateRequest.slots ?? food.slots
             food.bringContainer = updateRequest.bringContainer ?? food.bringContainer
             food.lat = updateRequest.lat ?? food.lat
             food.lon = updateRequest.lon ?? food.lon
+            food.showDistance = updateRequest.showDistance ?? food.showDistance
             food.expires = updateRequest.expires ?? food.expires
             food.$image.id = updateRequest.imageID ?? food.$image.id
             return self.foodRepository.save(food: food, on: req).transform(to: .ok)
