@@ -84,6 +84,7 @@ struct FoodRepositoryImpl: FoodRepository {
         .sort(\.$createdAt, .descending)
         .with(\.$image)
         .with(\.$creator)
+        .limit(10)
         .all()
     }
     
