@@ -21,6 +21,7 @@ service:
         apiVersion: ambassador/v2
         kind:  Mapping
         name:  food-service-food
+        host: api.whatscooking.app
         prefix: /food/
         service: food-service:8080
         rewrite: /food/
@@ -28,6 +29,7 @@ service:
         apiVersion: ambassador/v2
         kind:  Mapping
         name:  food-service-discover
+        host: api.whatscooking.app
         prefix: /discover/
         service: food-service:8080
         rewrite: /discover/
@@ -35,6 +37,7 @@ service:
         apiVersion: ambassador/v2
         kind:  Mapping
         name:  food-service-participant
+        host: api.whatscooking.app
         prefix: /participant/
         service: food-service:8080
         rewrite: /participant/
